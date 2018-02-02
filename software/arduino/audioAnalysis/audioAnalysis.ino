@@ -8,24 +8,20 @@ This program blends several demo scripts
 #include <ArduinoSound.h>
 
 // VARIABLES AND OBJECTS =================================================== //
-// filename of wave file to play
-const char filename[] = "1hz0p8.WAV";
+const char    filename[] = "1hz0p8.WAV";                                     // filename of wave file to play
+unsigned long timer;
+int           peak = 20000;                                                  // pre-determined peak to find
 
-// variable representing the Wave File
-SDWaveFile waveFile;
-AmplitudeAnalyzer amplitudeAnalyzer;
+SDWaveFile        waveFile;                                                  // variable representing the Wave File
+AmplitudeAnalyzer amplitudeAnalyzer;                                         // create amplitude analyzer object
 
 // SETUP LOOP ============================================================== //
-void setup() {
-  // Open serial communications and wait for port to open:
-  Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
+void setup() { 
+  Serial.begin(115200);                                                      // Open serial communications and wait for port to open:
+  while (!Serial) {                                                          // wait for serial port to connect. Needed for native USB port only
+    ; 
   }
-
   // Setup SD Card --------------------------------------------------------- //
-  // setup the SD card, depending on your shield of breakout board
-  // you may need to pass a pin number in begin for SS
   Serial.print("Initializing SD card...");
   if (!SD.begin()) {
     Serial.println("initialization failed!");
@@ -70,12 +66,6 @@ void setup() {
   Serial.println("starting playback");                                      // start playback
   AudioOutI2S.play(waveFile);
 
-  // Setup I2S input ------------------------------------------------------ //
-  //if (!AudioInI2S.begin(44100, 16)) {                       // adjust to the parameters of the audio file from the sd card
-  //  Serial.println("Failed to initialize I2S input!");
-  //  while (1); // do nothing
-  //} 
-
   // Setup AmplitudeAnalyzer ---------------------------------------------- //
   if (!amplitudeAnalyzer.input(waveFile)) {
     Serial.println("Failed to set amplitude analyzer input!");
@@ -85,21 +75,24 @@ void setup() {
 }
 
 void loop() {
-  // check if playback is still going on
-  if (!AudioOutI2S.isPlaying()) {
+  if (!AudioOutI2S.isPlaying()) {                                           // check if playback is still going on
     // playback has stopped
 
     Serial.println("playback stopped");
     while (1); // do nothing
   }
-
-  // check if a new analysis is available
-  if (amplitudeAnalyzer.available()) {
-    // read the new amplitude
-    int amplitude = amplitudeAnalyzer.read();
-
-    // print out the amplititude to the serial monitor
-    Serial.println(amplitude);
+  if (amplitudeAnalyzer.available()) {                                      // check if a new analysis is available
+    int amplitude = amplitudeAnalyzer.read();                               // read the new amplitude
+    if (amplitude > peak) {
+      timer = millis();
+      Serial.print(amplitude);
+      Serial.print(" || ");
+      Serial.print(timer);
+      Serial.print(" || ");
+      Serial.println(" * Peak Found");
+    }
+    else {
+      Serial.println(amplitude);                                              // print out the amplititude to the serial monitor
+    }
   }
-  
 }
