@@ -8,7 +8,8 @@ This program blends several demo scripts
 #include <ArduinoSound.h>
 
 // VARIABLES AND OBJECTS =================================================== //
-const char    filename[] = "1hz0p8.WAV";                                     // filename of wave file to play
+//const char    filename[] = "1hz0p8.WAV";                                     // filename of wave file to play
+const char    filename[] = "10hz0p8.WAV";                                     // filename of wave file to play
 unsigned long timer;
 int           peak = 20000;                                                  // pre-determined peak to find
 
@@ -58,6 +59,12 @@ void setup() {
   Serial.println(" seconds");
 
   // Setup I2S output ----------------------------------------------------- //
+  /*
+  if (!AudioInI2S.begin(44100, 16)) {
+    Serial.println("Failed to initialize I2S input!");
+    while (1); // do nothing
+  }
+  */
   AudioOutI2S.volume(5);                                                    // adjust volume
   if (!AudioOutI2S.canPlay(waveFile)) {                                     // check if the I2S output can play the wave file
     Serial.println("unable to play wave file using I2S!");
@@ -83,6 +90,7 @@ void loop() {
   }
   if (amplitudeAnalyzer.available()) {                                      // check if a new analysis is available
     int amplitude = amplitudeAnalyzer.read();                               // read the new amplitude
+    /*
     if (amplitude > peak) {
       timer = millis();
       Serial.print(amplitude);
@@ -94,5 +102,12 @@ void loop() {
     else {
       Serial.println(amplitude);                                              // print out the amplititude to the serial monitor
     }
+    */
+    Serial.println(amplitude);                                              // print out the amplititude to the serial monitor
+    //Serial.print("\t");
+    //timer = millis();
+    //Serial.print(timer);
+    //Serial.println();
   }
+  //Serial.println("nope");                                                 // sometimes there is no amplitude to be read?
 }
